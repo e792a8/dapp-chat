@@ -60,26 +60,30 @@ const text = ref<string>("");
 function select_chat(node_id: string) {
   chat_with.value = node_id;
   api.getP2PMessageList(node_id).then((resp) => {
-    message_list.value = resp.data.map((val) => {
-      let name = undefined;
-      let direction = 1;
-      if (Math.random() < 0.5) {
-        let fr = friends.value?.find((f) => f.node_id == val.node_id);
-        name = fr?.remark || val.node_id.toString();
-        direction = 1;
-      } else {
-        name = "Me";
-        direction = 2;
-      }
-      return {
-        message_id: val.message_id,
-        content: val.message,
-        sendTime: val.time,
-        seenTime: "not implemented",
-        direction,
-        name,
-      } as MessageItemType;
-    });
+    if (resp.data.retcode != 0) {
+      console.error("api error: " + resp.data.reason);
+    } else {
+      message_list.value = resp.data.data?.map((val) => {
+        let name = undefined;
+        let direction = 1;
+        if (Math.random() < 0.5) {
+          let fr = friends.value?.find((f) => f.node_id == val.node_id);
+          name = fr?.remark || val.node_id.toString();
+          direction = 1;
+        } else {
+          name = "Me";
+          direction = 2;
+        }
+        return {
+          message_id: val.message_id,
+          content: val.message,
+          sendTime: val.time,
+          seenTime: "not implemented",
+          direction,
+          name,
+        } as MessageItemType;
+      });
+    }
   });
 }
 
@@ -89,6 +93,10 @@ function send_message() {
 }
 
 api.getFriendList().then((resp) => {
-  friends.value = resp.data;
+  if (resp.data.retcode != 0) {
+    console.error("api error: " + resp.data.reason);
+  } else {
+    friends.value = resp.data.data;
+  }
 });
 </script>

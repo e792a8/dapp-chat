@@ -15,6 +15,12 @@ const p2pApiRequest = axios.create({
   },
 });
 
+interface ApiResult<T> {
+  retcode: 0 | 1;
+  data?: T;
+  reason?: string;
+}
+
 export const api = {
   async login(username: string, password: string) {},
   async sendP2PMessage(user_id: string, message: string) {
@@ -22,12 +28,12 @@ export const api = {
     p2pApiRequest.post("/send_p2p_message", { user_id, message });
   },
   async getP2PMessageList(node_id: string) {
-    return p2pApiRequest.get<IP2PMessage[]>("/get_p2p_msg_list", {
+    return p2pApiRequest.get<ApiResult<IP2PMessage[]>>("/get_p2p_msg_list", {
       params: { node_id },
     });
   },
   async getFriendList() {
-    return p2pApiRequest.get<IFriend[]>("/get_friend_list");
+    return p2pApiRequest.get<ApiResult<IFriend[]>>("/get_friend_list");
   },
   async addFriend(node_id: string, remark: string) {
     p2pApiRequest.put("/add_friend", { node_id, remark });
